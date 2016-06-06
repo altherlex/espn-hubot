@@ -8,44 +8,57 @@
 #
 #   These are from the scripting documentation: https://github.com/github/hubot/blob/master/docs/scripting.md
 
+child_process = require('child_process')
+
+ftp_gazeta = (res) ->
+  res.send "I`m trying to connect on Gazeta FTP. Wait a moment please..."
+
+  count_files = 10
+  count_files = res.message.text.match(/\d+/)[0] if res.message.text.match(/\d+/)
+
+  JSFtp = require("jsftp")
+  ftp = new JSFtp({
+    host: process.env.HUBOT_FTP_HOST,
+    user: process.env.HUBOT_FTP_USER,
+    pass: process.env.HUBOT_FTP_PASS
+  })
+  ftp.list ".", (err, response) ->
+    if err
+      res.send 'I got an error: ' + err.message
+    else
+      files = []
+      result = response.split('.xml').splice(-count_files).join('.xml ')
+      res.send "The latest ten files are..."
+      res.send result
+
+      # response.slice(-4).forEach (file) -> files.push file.name
+      # console.log('******************************')
+      # console.log(files.join(';'))
+      # console.log('******************************')
+      # res.send files.join(';')
+
 module.exports = (robot) ->
 
+  robot.catchAll (msg) ->
+    if msg.message.text.match(/gazeta/) and msg.message.text.match(/files/)
+      ftp_gazeta(msg)
+    # else
+    #   msg.send "I don't know how to react to: #{msg.message.text}"
+  
   robot.hear /gazeta files/i, (res) ->
-    res.send "I`ll try to connect on Gazeta FTP. Wait a moment please..."
-    JSFtp = require("jsftp")
-    ftp = new JSFtp({
-      host: process.env.HUBOT_FTP_HOST,
-      user: process.env.HUBOT_FTP_USER,
-      pass: process.env.HUBOT_FTP_PASS
-    })
-    ftp.list ".", (err, response) ->
-      if err
-        res.send err
-      else
-        files = []
-        result = response.split('.xml').splice(-10).join('.xml ')
-        console.log(result)
-        res.send "The latest ten files are..."
-        res.send result
-
-        # response.slice(-4).forEach (file) -> files.push file.name
-        # console.log('******************************')
-        # console.log(files.join(';'))
-        # console.log('******************************')
-        # res.send files.join(';')
+    ftp_gazeta(res, res.match[1])
 
   robot.hear /version/i, (res) ->
-    res.send "v1.2"
+    res.send "v1.3"
 
-  robot.hear /badger/i, (res) ->
-    res.send "Badgers? BADGERS? WE DON'T NEED NO STINKIN BADGERS"
-  #
-  robot.respond /open the (.*) doors/i, (res) ->
-    doorType = res.match[1]
-    if doorType is "pod bay"
-      res.reply "I'm afraid I can't let you do that."
-    else
-      res.reply "Opening #{doorType} doors"
+  robot.hear /shell (.*)/, (res) ->
+    bash_cmd = res.match[1]
+    child_process.exec bash_cmd, (error, stdout, stderr) ->
+      if error
+        res.send(error)
+      else
+        res.send(stdout)      
+
   #
   # robot.hear /I like pie/i, (res) ->
   #   res.emote "makes a freshly baked pie"
@@ -86,7 +99,6 @@ module.exports = (robot) ->
   #   if annoyIntervalId
   #     res.send "AAAAAAAAAAAEEEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIHHHHHHHHHH"
   #     return
-  #
   #   res.send "Hey, want to hear the most annoying sound in the world?"
   #   annoyIntervalId = setInterval () ->
   #     res.send "AAAAAAAAAAAEEEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIHHHHHHHHHH"

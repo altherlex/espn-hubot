@@ -35,6 +35,28 @@ Then you can interact with espn-hubot by typing `espn-hubot help`.
     espn-hubot help - Displays all of the help commands that espn-hubot knows about.
     ...
 
+#### Debugger
+
+Run the listenner of port 5858
+
+```bash
+$ node-inspector --no-preload --web-port 8123
+```    
+
+So, run your hubot on port 5858
+
+```
+$ coffee --nodejs --debug node_modules/.bin/hubot
+```
+
+Use `debugger` to stop the execution
+
+### Phrases
+
+* Get 3 latest gazeta files
+`muleque doidao.. ta na boa? faz o seguinte: veja os 3 ultimos files do gazeta`
+
+
 ### Configuration
 
 A few scripts (including some installed by default) require environment
