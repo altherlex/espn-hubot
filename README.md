@@ -56,6 +56,13 @@ Use `debugger` to stop the execution
 * Get 3 latest gazeta files
 `muleque doidao.. ta na boa? faz o seguinte: veja os 3 ultimos files do gazeta`
 
+#### Config Heroku
+
+* Timezone
+`heroku config:add TZ="America/Sao_Paulo"`
+
+* KeepAlive on Keroku (up to 18 hours/day)
+`heroku config:set HUBOT_HEROKU_KEEPALIVE_URL=$(heroku apps:info -s | grep web-url | cut -d= -f2)`
 
 ### Configuration
 

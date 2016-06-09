@@ -1,63 +1,46 @@
 # Description:
-#   Example scripts for you to examine and try out.
+#   Gazeta scripts for knows about Gazeta FTP.
+#
+# Commands:
+#   hubot 5 files do FTP da Gazeta - Displays latest 5 files from Gazeta FTP (GET '/emitter/ftp_gazeta' to emit on HTTP).
 #
 # Notes:
-#   They are commented out by default, because most of them are pretty silly and
-#   wouldn't be useful and amusing enough for day to day huboting.
-#   Uncomment the ones you want to try and experiment with.
-#
-#   These are from the scripting documentation: https://github.com/github/hubot/blob/master/docs/scripting.md
-
-child_process = require('child_process')
-
-ftp_gazeta = (res) ->
-  res.send "I`m trying to connect on Gazeta FTP. Wait a moment please..."
-
-  count_files = 10
-  count_files = res.message.text.match(/\d+/)[0] if res.message.text.match(/\d+/)
-
-  JSFtp = require("jsftp")
-  ftp = new JSFtp({
-    host: process.env.HUBOT_FTP_HOST,
-    user: process.env.HUBOT_FTP_USER,
-    pass: process.env.HUBOT_FTP_PASS
-  })
-  ftp.list ".", (err, response) ->
-    if err
-      res.send 'I got an error: ' + err.message
-    else
-      files = []
-      result = response.split('.xml').splice(-count_files).join('.xml ')
-      res.send "The latest ten files are..."
-      res.send result
-
-      # response.slice(-4).forEach (file) -> files.push file.name
-      # console.log('******************************')
-      # console.log(files.join(';'))
-      # console.log('******************************')
-      # res.send files.join(';')
+#    You can make any phrase with two key words: files and gazeta
+#    If the phrase include a number. It will recognize as file number
 
 module.exports = (robot) ->
+  robot.on "ftp_gazeta", (res, callback_to_send) ->
+    callback_to_send "I`m trying to connect on Gazeta FTP. Wait a moment please..."
 
+    count_files = 10
+    if res.message and res.message.text and res.message.text.match(/\d+/)
+      count_files = res.message.text.match(/\d+/)[0] 
+
+    JSFtp = require("jsftp")
+
+    ftp = new JSFtp({
+      host: process.env.HUBOT_FTP_HOST,
+      user: process.env.HUBOT_FTP_USER,
+      pass: process.env.HUBOT_FTP_PASS
+    })
+
+    ftp.list ".", (err, response) ->
+      if err
+        callback_to_send 'I got an error: ' + err.message
+      else
+        files = []
+        result = response.split('.xml').splice(-(+count_files+1)).join('.xml ')
+        callback_to_send "The latest #{count_files} files are..."
+        callback_to_send result
+
+  # Catching all message
   robot.catchAll (msg) ->
     if msg.message.text.match(/gazeta/) and msg.message.text.match(/files/)
-      ftp_gazeta(msg)
+      robot.emit "ftp_gazeta", msg, (m)-> msg.send(m)
     # else
     #   msg.send "I don't know how to react to: #{msg.message.text}"
-  
-  robot.hear /gazeta files/i, (res) ->
-    ftp_gazeta(res, res.match[1])
 
-  robot.hear /version/i, (res) ->
-    res.send "v1.3"
 
-  robot.hear /shell (.*)/, (res) ->
-    bash_cmd = res.match[1]
-    child_process.exec bash_cmd, (error, stdout, stderr) ->
-      if error
-        res.send(error)
-      else
-        res.send(stdout)      
 
   #
   # robot.hear /I like pie/i, (res) ->
