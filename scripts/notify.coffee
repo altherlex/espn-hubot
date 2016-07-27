@@ -12,14 +12,13 @@ module.exports = (robot) ->
     message = req.body.message
     room = req.body.room
     robot.messageRoom room, message
-    res.end 'Thanks jenkins!'
+    res.end 'Thanks chappie!'
 
-  robot.router.get "/notify", (req, res) ->
-    console.log(req.body)
-    message = req.body.message
+  robot.router.get "/notify/:room", (req, res) ->
+    message = req.query.message
     room = req.body.room
     robot.messageRoom room, message
-    res.end 'Thanks jenkins!'
+    res.end 'Thanks chappie!'
 
   robot.router.post '/hubot/notify/:room', (req, res) ->
     room = req.params.room
