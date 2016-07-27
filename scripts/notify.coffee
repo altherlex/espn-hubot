@@ -20,7 +20,7 @@ module.exports = (robot) ->
     robot.messageRoom room, message
     res.end()
 
-  robot.router.get '/hubot/notify/:room', (req, res) ->v
+  robot.router.get '/hubot/notify/:room', (req, res) ->
     res.setHeader 'content-type', 'text/html'
     room = req.params.room
     res.end 'Room:'+room    
