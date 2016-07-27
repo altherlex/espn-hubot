@@ -51,10 +51,15 @@ $ coffee --nodejs --debug node_modules/.bin/hubot
 
 Use `debugger` to stop the execution
 
-### Phrases
+### Phrases and Enpoints
 
 * Get 3 latest gazeta files
 `muleque doidao.. ta na boa? faz o seguinte: veja os 3 ultimos files do gazeta`
+
+* Calling Gazeta FTP function from HTTP
+`$curl http://localhost:8080/emitter/ftp_gazeta`
+or
+`$curl http://localhost:8080/emitter/ftp_gazeta/br-dev`
 
 #### Config Heroku
 
